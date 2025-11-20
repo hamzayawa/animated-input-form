@@ -65,3 +65,32 @@ export function validateConfirmPassword(value: string, password: string): string
   return null
 }
 
+export type PasswordStrength = "Weak" | "Medium" | "Strong"
+
+export function getPasswordStrength(value: string): PasswordStrength {
+  let score = 0
+
+  if (!value) return "Weak"
+
+  // Length
+  if (value.length >= 8) score += 1
+  if (value.length >= 12) score += 1
+
+  // Character types
+  if (/[a-z]/.test(value)) score += 1
+  if (/[A-Z]/.test(value)) score += 1
+  if (/[0-9]/.test(value)) score += 1
+  if (/[!@#$%^&*]/.test(value)) score += 1
+
+  // Determine strength
+  if (score <= 3) return "Weak"
+  if (score <= 5) return "Medium"
+  return "Strong"
+}
+
+export function validatePasswordWithStrength(value: string): { error: string | null; strength: PasswordStrength } {
+  const error = validatePassword(value)
+  const strength = getPasswordStrength(value)
+  return { error, strength }
+}
+

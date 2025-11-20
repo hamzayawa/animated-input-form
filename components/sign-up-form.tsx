@@ -12,8 +12,10 @@ import {
   validateLastName,
   validateUsername,
   validateEmail,
-  validatePassword,
+  // validatePassword,
   validateConfirmPassword,
+  validatePasswordWithStrength,
+  PasswordStrength,
 } from "@/lib/validation"
 
 interface SignUpFormProps {
@@ -44,6 +46,7 @@ export default function SignUpForm({ onToggle }: SignUpFormProps) {
   })
 
   const [errors, setErrors] = useState<ValidationErrors>({})
+  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -53,7 +56,14 @@ export default function SignUpForm({ onToggle }: SignUpFormProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+
+    // Update password strength dynamically
+    if (name === "password") {
+      const { strength } = validatePasswordWithStrength(value)
+      setPasswordStrength(strength)
+    }
   }
+
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -73,7 +83,11 @@ export default function SignUpForm({ onToggle }: SignUpFormProps) {
         error = validateEmail(value)
         break
       case "password":
-        error = validatePassword(value)
+        if (name === "password") {
+          const result = validatePasswordWithStrength(value)
+          error = result.error
+          setPasswordStrength(result.strength) // ensure strength is updated on blur too
+        }
         break
       case "confirmPassword":
         error = validateConfirmPassword(value, formData.password)
@@ -177,8 +191,9 @@ export default function SignUpForm({ onToggle }: SignUpFormProps) {
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           )}
+          {/* Always render ValidationFeedback for password */}
+          <ValidationFeedback error={errors.password} strength={passwordStrength} />
         </div>
-        {errors.password && <ValidationFeedback error={errors.password} />}
 
         {/* Confirm Password */}
         <div className="relative">
