@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build 2>/dev/null",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "preinstall": "pnpm add -D baseline-browser-mapping@latest"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
